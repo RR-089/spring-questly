@@ -35,7 +35,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             authorities.add(new SimpleGrantedAuthority("QUESTER"));
         }
 
-        if (foundUser.isQuester()) {
+        if (foundUser.isRequester()) {
             authorities.add(new SimpleGrantedAuthority("REQUESTER"));
         }
 
