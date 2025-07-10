@@ -14,12 +14,15 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    public static String[] publicPathPatterns = {"/auth/**"};
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth ->
-                    auth.anyRequest().permitAll()
+                    auth.requestMatchers(publicPathPatterns).permitAll()
+                        .anyRequest().permitAll()
             );
 
         return http.build();
