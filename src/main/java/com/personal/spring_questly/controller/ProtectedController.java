@@ -2,6 +2,8 @@ package com.personal.spring_questly.controller;
 
 import com.personal.spring_questly.annotation.auth.QuesterOnly;
 import com.personal.spring_questly.annotation.auth.RequesterOnly;
+import com.personal.spring_questly.annotation.docs.protecteds.GetQuesterOnlyResponseDocs;
+import com.personal.spring_questly.annotation.docs.protecteds.GetRequesterOnlyResponseDocs;
 import com.personal.spring_questly.dto.common.ApiResponseDTO;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,6 +27,7 @@ public class ProtectedController {
 
     @GetMapping(value = "quester")
     @QuesterOnly
+    @GetQuesterOnlyResponseDocs
     public ResponseEntity<ApiResponseDTO<Object>> getOnlyQuesterRoute() {
         ApiResponseDTO<Object> response = ApiResponseDTO.builder()
                                                         .status(HttpStatus.OK.value())
@@ -37,6 +40,7 @@ public class ProtectedController {
 
     @GetMapping(value = "requester")
     @RequesterOnly
+    @GetRequesterOnlyResponseDocs
     public ResponseEntity<ApiResponseDTO<Object>> getOnlyRequesterRoute() {
         ApiResponseDTO<Object> response = ApiResponseDTO.builder()
                                                         .status(HttpStatus.OK.value())
