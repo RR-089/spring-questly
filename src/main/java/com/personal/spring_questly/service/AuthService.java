@@ -1,10 +1,10 @@
 package com.personal.spring_questly.service;
 
-import com.personal.spring_questly.dto.auth.LoginDTO;
-import com.personal.spring_questly.dto.auth.RegisterDTO;
+import com.personal.spring_questly.dto.auth.LoginRequestDTO;
+import com.personal.spring_questly.dto.auth.RegisterRequestDTO;
 
 public interface AuthService {
-    String register(RegisterDTO dto);
+    String register(RegisterRequestDTO dto);
 
-    String login(LoginDTO dto);
+    String login(LoginRequestDTO dto);
 }

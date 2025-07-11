@@ -1,7 +1,7 @@
 package com.personal.spring_questly.service.impl;
 
-import com.personal.spring_questly.dto.auth.LoginDTO;
-import com.personal.spring_questly.dto.auth.RegisterDTO;
+import com.personal.spring_questly.dto.auth.LoginRequestDTO;
+import com.personal.spring_questly.dto.auth.RegisterRequestDTO;
 import com.personal.spring_questly.exception.CustomException.BadRequestException;
 import com.personal.spring_questly.exception.CustomException.UnauthorizedException;
 import com.personal.spring_questly.model.User;
@@ -22,7 +22,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public String register(RegisterDTO dto) {
+    public String register(RegisterRequestDTO dto) {
         if (userRepository.existsByEmail(dto.email())) {
             throw new BadRequestException("Email is already taken", null);
         }
@@ -41,7 +41,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String login(LoginDTO dto) {
+    public String login(LoginRequestDTO dto) {
         User foundUser = userRepository.findByEmail(dto.email()).orElseThrow(
                 () -> new UnauthorizedException("Invalid credentials", null)
         );

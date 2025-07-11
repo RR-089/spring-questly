@@ -1,7 +1,7 @@
 package com.personal.spring_questly.controller;
 
-import com.personal.spring_questly.dto.auth.LoginDTO;
-import com.personal.spring_questly.dto.auth.RegisterDTO;
+import com.personal.spring_questly.dto.auth.LoginRequestDTO;
+import com.personal.spring_questly.dto.auth.RegisterRequestDTO;
 import com.personal.spring_questly.dto.common.ApiResponseDTO;
 import com.personal.spring_questly.service.AuthService;
 import jakarta.validation.Valid;
@@ -21,7 +21,7 @@ public class AuthController {
 
     @PostMapping(value = "/register")
     public ResponseEntity<ApiResponseDTO<String>> register(
-            @Valid @RequestBody RegisterDTO dto
+            @Valid @RequestBody RegisterRequestDTO dto
     ) {
         HttpStatus status = HttpStatus.CREATED;
         String data = authService.register(dto);
@@ -37,7 +37,7 @@ public class AuthController {
 
     @PostMapping(value = "/login")
     public ResponseEntity<ApiResponseDTO<String>> login(
-            @Valid @RequestBody LoginDTO dto
+            @Valid @RequestBody LoginRequestDTO dto
     ) {
         String data = authService.login(dto);
 

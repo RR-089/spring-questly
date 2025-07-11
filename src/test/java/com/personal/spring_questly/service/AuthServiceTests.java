@@ -1,7 +1,7 @@
 package com.personal.spring_questly.service;
 
-import com.personal.spring_questly.dto.auth.LoginDTO;
-import com.personal.spring_questly.dto.auth.RegisterDTO;
+import com.personal.spring_questly.dto.auth.LoginRequestDTO;
+import com.personal.spring_questly.dto.auth.RegisterRequestDTO;
 import com.personal.spring_questly.exception.CustomException.BadRequestException;
 import com.personal.spring_questly.exception.CustomException.UnauthorizedException;
 import com.personal.spring_questly.model.User;
@@ -39,15 +39,15 @@ public class AuthServiceTests {
 
     @Test
     void testRegister_EmailIsAlreadyTaken_BadRequest() {
-        RegisterDTO dto = RegisterDTO.builder()
-                                     .email("test123@gmail.com")
-                                     .password("123qwe")
-                                     .firstName("Test")
-                                     .lastName("Tset")
-                                     .firstName("Test Tset")
-                                     .isQuester(true)
-                                     .isRequester(false)
-                                     .build();
+        RegisterRequestDTO dto = RegisterRequestDTO.builder()
+                                                   .email("test123@gmail.com")
+                                                   .password("123qwe")
+                                                   .firstName("Test")
+                                                   .lastName("Tset")
+                                                   .firstName("Test Tset")
+                                                   .isQuester(true)
+                                                   .isRequester(false)
+                                                   .build();
 
         when(userRepository.existsByEmail(dto.email())).thenReturn(true);
 
@@ -66,15 +66,15 @@ public class AuthServiceTests {
 
     @Test
     void testRegister_Success() {
-        RegisterDTO dto = RegisterDTO.builder()
-                                     .email("test123@gmail.com")
-                                     .password("123qwe")
-                                     .firstName("Test")
-                                     .lastName("Tset")
-                                     .firstName("Test Tset")
-                                     .isQuester(true)
-                                     .isRequester(false)
-                                     .build();
+        RegisterRequestDTO dto = RegisterRequestDTO.builder()
+                                                   .email("test123@gmail.com")
+                                                   .password("123qwe")
+                                                   .firstName("Test")
+                                                   .lastName("Tset")
+                                                   .firstName("Test Tset")
+                                                   .isQuester(true)
+                                                   .isRequester(false)
+                                                   .build();
 
         String fullName = dto.firstName() + " " + dto.lastName();
 
@@ -105,10 +105,10 @@ public class AuthServiceTests {
 
     @Test
     void testLogin_UserNotFound_Unauthorized() {
-        LoginDTO dto = LoginDTO.builder()
-                               .email("test123@gmail.com")
-                               .password("123qwe")
-                               .build();
+        LoginRequestDTO dto = LoginRequestDTO.builder()
+                                             .email("test123@gmail.com")
+                                             .password("123qwe")
+                                             .build();
 
         when(userRepository.findByEmail(dto.email())).thenReturn(Optional.empty());
 
@@ -123,10 +123,10 @@ public class AuthServiceTests {
 
     @Test
     void testLogin_IncorrectPassword_Unauthorized() {
-        LoginDTO dto = LoginDTO.builder()
-                               .email("test123@gmail.com")
-                               .password("123qwe")
-                               .build();
+        LoginRequestDTO dto = LoginRequestDTO.builder()
+                                             .email("test123@gmail.com")
+                                             .password("123qwe")
+                                             .build();
 
         User foundUser = User.builder()
                              .id(UUID.randomUUID())
@@ -152,10 +152,10 @@ public class AuthServiceTests {
 
     @Test
     void testLogin_Success() {
-        LoginDTO dto = LoginDTO.builder()
-                               .email("test123@gmail.com")
-                               .password("123qwe")
-                               .build();
+        LoginRequestDTO dto = LoginRequestDTO.builder()
+                                             .email("test123@gmail.com")
+                                             .password("123qwe")
+                                             .build();
 
         User foundUser = User.builder()
                              .id(UUID.randomUUID())
