@@ -10,18 +10,30 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
+
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
 
     public static String[] publicPathPatterns = {"/auth/**"};
+    public static String[] docsPatterns = {
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/api-docs/**"
+    };
+
+    public static String[] allPublicPatterns = Stream.concat(Arrays.stream(publicPathPatterns),
+            Arrays.stream(docsPatterns)).toArray(String[]::new);
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth ->
-                    auth.requestMatchers(publicPathPatterns).permitAll()
+                    auth.requestMatchers(allPublicPatterns).permitAll()
                         .anyRequest().permitAll()
             );
 

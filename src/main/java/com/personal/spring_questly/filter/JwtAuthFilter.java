@@ -34,7 +34,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        String[] publicPathPatterns = SecurityConfig.publicPathPatterns;
+        String[] publicPathPatterns = SecurityConfig.allPublicPatterns;
 
         String currentPath =
                 request.getRequestURI().substring(request.getContextPath().length());
