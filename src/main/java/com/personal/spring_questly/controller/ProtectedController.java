@@ -3,6 +3,8 @@ package com.personal.spring_questly.controller;
 import com.personal.spring_questly.annotation.auth.QuesterOnly;
 import com.personal.spring_questly.annotation.auth.RequesterOnly;
 import com.personal.spring_questly.dto.common.ApiResponseDTO;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -17,6 +19,8 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/protected")
+@Tag(name = "Protected route example")
+@SecurityRequirement(name = "bearerAuth")
 public class ProtectedController {
 
     @GetMapping(value = "quester")
