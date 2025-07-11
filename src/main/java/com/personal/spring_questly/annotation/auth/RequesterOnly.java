@@ -1,4 +1,4 @@
-package com.personal.spring_questly.annotation;
+package com.personal.spring_questly.annotation.auth;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 
