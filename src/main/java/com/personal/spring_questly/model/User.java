@@ -1,5 +1,6 @@
 package com.personal.spring_questly.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
@@ -40,6 +41,10 @@ public class User extends TimeStamp {
 
     @Column(name = "is_quester", nullable = false)
     private boolean isQuester;
+
+    @OneToOne(mappedBy = "user", cascade = {CascadeType.ALL}, orphanRemoval = true)
+    @JsonIgnoreProperties("user")
+    private UserProfile userProfile;
 
     @Override
     public boolean equals(Object o) {
