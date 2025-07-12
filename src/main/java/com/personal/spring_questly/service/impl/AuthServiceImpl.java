@@ -5,6 +5,7 @@ import com.personal.spring_questly.dto.auth.RegisterRequestDTO;
 import com.personal.spring_questly.exception.CustomException.BadRequestException;
 import com.personal.spring_questly.exception.CustomException.UnauthorizedException;
 import com.personal.spring_questly.model.User;
+import com.personal.spring_questly.model.UserProfile;
 import com.personal.spring_questly.repository.UserRepository;
 import com.personal.spring_questly.service.AuthService;
 import com.personal.spring_questly.util.JwtUtil;
@@ -36,6 +37,8 @@ public class AuthServiceImpl implements AuthService {
                            .isQuester(dto.isQuester())
                            .isRequester(dto.isRequester())
                            .build();
+
+        newUser.addUserProfile(UserProfile.builder().build());
 
         return jwtUtil.generateToken(userRepository.save(newUser).getEmail());
     }

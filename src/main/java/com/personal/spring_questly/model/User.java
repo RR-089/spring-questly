@@ -46,6 +46,11 @@ public class User extends TimeStamp {
     @JsonIgnoreProperties("user")
     private UserProfile userProfile;
 
+    public void addUserProfile(UserProfile userProfile) {
+        this.userProfile = userProfile;
+        userProfile.setUser(this);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
