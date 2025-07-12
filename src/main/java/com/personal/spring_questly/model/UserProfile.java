@@ -28,12 +28,13 @@ public class UserProfile {
     @Builder.Default
     private String language = "id";
 
-    @Column(name = "profile_picture_uri")
-    private String profilePictureUri;
-
     @Column(name = "timezone")
     @Builder.Default
     private String timezone = "Asia/Jakarta";
+
+    @OneToOne
+    @JoinColumn(name = "profile_picture_id", referencedColumnName = "file_id")
+    private File profilePicture;
 
     @OneToOne
     @JoinColumn(name = "user_id")
@@ -56,7 +57,7 @@ public class UserProfile {
         return "UserProfile{" +
                 "id=" + id +
                 ", theme='" + theme + '\'' +
-                ", profilePictureUrl='" + profilePictureUri + '\'' +
+                ", language='" + language + '\'' +
                 ", timezone='" + timezone + '\'' +
                 '}';
     }
