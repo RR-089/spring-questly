@@ -28,8 +28,8 @@ public class UserProfile {
     @Builder.Default
     private String language = "id";
 
-    @Column(name = "profile_picture_url")
-    private String profilePictureUrl;
+    @Column(name = "profile_picture_uri")
+    private String profilePictureUri;
 
     @Column(name = "timezone")
     @Builder.Default
@@ -56,7 +56,7 @@ public class UserProfile {
         return "UserProfile{" +
                 "id=" + id +
                 ", theme='" + theme + '\'' +
-                ", profilePictureUrl='" + profilePictureUrl + '\'' +
+                ", profilePictureUrl='" + profilePictureUri + '\'' +
                 ", timezone='" + timezone + '\'' +
                 '}';
     }
