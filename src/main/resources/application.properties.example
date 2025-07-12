@@ -1,3 +1,6 @@
 spring.application.name=spring-questly
 server.servlet.context-path=/api
 spring.profiles.active=dev
+file.upload-dir=./uploads/
+spring.servlet.multipart.max-request-size=15MB
+spring.servlet.multipart.max-file-size=10MB

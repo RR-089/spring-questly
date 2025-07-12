@@ -17,6 +17,7 @@ public class File extends TimeStamp {
     @Id
     @GeneratedValue
     @UuidGenerator
+    @Column(name = "file_id")
     private UUID id;
 
     @Column(name = "module_name", nullable = false)
