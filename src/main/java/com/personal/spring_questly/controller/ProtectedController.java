@@ -21,7 +21,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/protected")
-@Tag(name = "Protected route example")
+@Tag(name = "Protected", description = "Just examples of protected route")
 @SecurityRequirement(name = "bearerAuth")
 public class ProtectedController {
 
