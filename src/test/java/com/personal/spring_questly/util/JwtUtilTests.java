@@ -7,6 +7,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Base64;
 
+import static com.personal.spring_questly.utils.FieldUtils.injectField;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -37,15 +38,5 @@ public class JwtUtilTests {
         assertNotNull(token);
         assertNotNull(actualEmail);
         assertEquals(email, actualEmail);
-    }
-
-    private void injectField(Object target, String field, Object value) {
-        try {
-            var declaredField = target.getClass().getDeclaredField(field);
-            declaredField.setAccessible(true);
-            declaredField.set(target, value);
-        } catch (Exception ex) {
-            throw new RuntimeException("Cannot inject field");
-        }
     }
 }
