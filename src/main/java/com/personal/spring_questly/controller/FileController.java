@@ -1,20 +1,17 @@
 package com.personal.spring_questly.controller;
 
 import com.personal.spring_questly.dto.common.ApiResponseDTO;
-import com.personal.spring_questly.model.File;
-import com.personal.spring_questly.model.User;
+import com.personal.spring_questly.dto.file.BulkUploadFilesRequestDTO;
 import com.personal.spring_questly.repository.UserRepository;
 import com.personal.spring_questly.service.FileService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.util.List;
 
 @RestController
@@ -25,23 +22,40 @@ public class FileController {
     private final FileService fileService;
     private final UserRepository userRepository;
 
-    //TODO: Test route delete this later
-    @PostMapping(value = "upload", consumes = "multipart/form-data")
-    public ResponseEntity<ApiResponseDTO<String>> uploadFile(@RequestPart("file") MultipartFile file) {
-        List<File> data = fileService.bulkUploadFiles("user-profile", List.of(file));
+    @GetMapping(value = "{moduleName}/{fileName:.+}")
+    public ResponseEntity<?> getFile(
+            @PathVariable("moduleName") String moduleName,
+            @PathVariable("fileName") String fileName
+    ) {
+        File data = fileService.getFileByModuleNameAndFileName(moduleName, fileName);
 
-        User foundUser = userRepository.findByEmail("deerut@gmail.com").orElseThrow();
+        return ResponseEntity.ok()
+                             .header("Content-Type", fileService.getFileMimeType(data))
+                             .header("Content-Disposition", fileService.getFileDisposition(data))
+                             .body(fileService.readAllBytes(data));
+    }
 
-        foundUser.getUserProfile().setProfilePicture(data.get(0));
+    @PostMapping(value = "bulk-upload")
+    public ResponseEntity<ApiResponseDTO<Object>> uploadFiles(
+            @Valid @ModelAttribute BulkUploadFilesRequestDTO dto
+    ) {
+        HttpStatus status = HttpStatus.CREATED;
+        List<com.personal.spring_questly.model.File> data =
+                fileService.bulkUploadFiles(dto.moduleName(), dto.files());
 
-        userRepository.save(foundUser);
+        Object responseData = data.size() > 1 ?
+                List.of(data.stream()
+                            .map(com.personal.spring_questly.model.File::getUri)
+                            .toList())
+                : data.get(0).getUri();
 
-        return ResponseEntity.ok(
-                ApiResponseDTO.<String>builder()
-                              .status(HttpStatus.OK.value())
-                              .message("upload success")
-                              .data(data.get(0).getName())
+        return ResponseEntity.status(status).body(
+                ApiResponseDTO.builder()
+                              .status(status.value())
+                              .message("Bulk upload successful")
+                              .data(responseData)
                               .build()
         );
     }
+
 }

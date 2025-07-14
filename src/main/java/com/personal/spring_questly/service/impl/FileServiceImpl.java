@@ -67,7 +67,7 @@ public class FileServiceImpl implements FileService {
         log.info("Get file: {}/{}", moduleName, fileName);
 
         File file =
-                new File(uploadDir + File.separator + moduleName + File.separator + fileName);
+                new File(uploadDir + "/" + moduleName + "/" + fileName);
 
         if (!file.exists() || !file.isFile()) {
             throw new NotFoundException("Resource not found", null);
@@ -122,14 +122,14 @@ public class FileServiceImpl implements FileService {
 
     private String getFilePath(String moduleName, String randomFileName) throws IOException {
         File moduleDir = moduleName != null ?
-                new File(uploadDir + File.separator + moduleName)
+                new File(uploadDir + "/" + moduleName)
                 : new File(uploadDir);
 
         if (!moduleDir.exists() && !moduleDir.mkdirs()) {
             throw new IOException("Failed to create directory: " + moduleDir.getAbsolutePath());
         }
 
-        return moduleDir.getAbsolutePath() + File.separator + randomFileName;
+        return moduleDir.getAbsolutePath() + "/" + randomFileName;
     }
 
     private String getFileExtension(MultipartFile file) {
@@ -144,7 +144,7 @@ public class FileServiceImpl implements FileService {
 
     private String getFileUri(String moduleName, String randomFileName) {
         return (moduleName != null && !moduleName.isBlank()
-                ? File.separator + moduleName : "")
-                + File.separator + randomFileName;
+                ? "/" + moduleName : "")
+                + "/" + randomFileName;
     }
 }
