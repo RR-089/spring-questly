@@ -1,10 +1,12 @@
 package com.personal.spring_questly.service;
 
+import com.personal.spring_questly.dto.file.BulkDeleteFilesResponseDTO;
 import com.personal.spring_questly.dto.file.FileDTO;
 import com.personal.spring_questly.exception.CustomException.BadRequestException;
 import com.personal.spring_questly.exception.CustomException.NotFoundException;
 import com.personal.spring_questly.repository.FileRepository;
 import com.personal.spring_questly.service.impl.FileServiceImpl;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +20,10 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +33,8 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class FileServiceTests {
+    private static final String UPLOAD_DIR = "./uploads/";
+    private static final String MODULE_NAME = "testmodule";
 
     @Mock
     private FileRepository fileRepository;
@@ -35,7 +43,19 @@ public class FileServiceTests {
 
     @BeforeEach
     void setup() {
-        injectField(fileService, "uploadDir", "./uploads/");
+        injectField(fileService, "uploadDir", UPLOAD_DIR);
+    }
+
+    @AfterEach
+    void cleanup() throws IOException {
+        // Clean up any files created under ./uploads/testmodule/
+        Path moduleDir = Paths.get(UPLOAD_DIR, MODULE_NAME);
+        if (Files.exists(moduleDir)) {
+            Files.walk(moduleDir)
+                 .sorted(Comparator.reverseOrder())
+                 .map(Path::toFile)
+                 .forEach(File::delete);
+        }
     }
 
     @Test
@@ -144,7 +164,7 @@ public class FileServiceTests {
 
     @Test
     void testGetFileByModuleNameAndFileName_Success() throws IOException {
-        String moduleName = "testmodule";
+        String moduleName = MODULE_NAME;
         String fileName = "testimage.png";
 
         File moduleDir = new File("./uploads/" + moduleName);
@@ -181,7 +201,7 @@ public class FileServiceTests {
         List<MultipartFile> multipartFiles = List.of(mockFile1, mockFile2);
 
         BadRequestException errors = assertThrows(BadRequestException.class, () ->
-                spyService.bulkUploadFiles("testmodule", multipartFiles));
+                spyService.bulkUploadFiles(MODULE_NAME, multipartFiles));
 
         assertNotNull(errors);
         assertEquals("Bulk upload files failed", errors.getMessage());
@@ -203,14 +223,14 @@ public class FileServiceTests {
                 .thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
 
         List<com.personal.spring_questly.model.File> result =
-                fileService.bulkUploadFiles("testmodule", multipartFiles);
+                fileService.bulkUploadFiles(MODULE_NAME, multipartFiles);
 
         assertNotNull(result);
         assertEquals(1, result.size());
         assertNull(result.get(0).getIndex());
         assertTrue(result.get(0).getName().endsWith(".png"));
 
-        assertEquals("testmodule", result.get(0).getModuleName());
+        assertEquals(MODULE_NAME, result.get(0).getModuleName());
 
         verify(fileRepository, times(1)).saveAll(anyList());
     }
@@ -236,7 +256,7 @@ public class FileServiceTests {
                 .thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
 
         List<com.personal.spring_questly.model.File> result =
-                fileService.bulkUploadFiles("testmodule", multipartFiles);
+                fileService.bulkUploadFiles(MODULE_NAME, multipartFiles);
 
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -245,10 +265,68 @@ public class FileServiceTests {
         assertTrue(result.get(0).getName().endsWith(".png"));
         assertTrue(result.get(1).getName().endsWith(".jpg"));
 
-        assertEquals("testmodule", result.get(0).getModuleName());
+        assertEquals(MODULE_NAME, result.get(0).getModuleName());
 
         verify(fileRepository, times(1)).saveAll(anyList());
     }
 
+
+    @Test
+    void bulkDeleteFiles_shouldHandleExistingAndMissingFilesProperly() throws IOException {
+        // Arrange
+        UUID id1 = UUID.randomUUID(); // will be deleted
+        UUID id2 = UUID.randomUUID(); // will fail (not created)
+
+        com.personal.spring_questly.model.File file1 = createTestFile(id1, "file1.txt");
+        com.personal.spring_questly.model.File file2 = createTestFile(id2, "file2.txt");
+
+        List<UUID> ids = List.of(id1, id2);
+
+        when(fileRepository.findAllById(ids)).thenReturn(List.of(file1, file2));
+
+        // Create file1 only
+        createFileOnDisk(file1);
+        // Do not create file2
+
+        // Act
+        BulkDeleteFilesResponseDTO response = fileService.bulkDeleteFiles(ids);
+
+        // Assert
+        assertEquals(1, response.deletedFiles().size());
+        assertEquals(1, response.undeletedFiles().size());
+
+        assertEquals("file1.txt", response.deletedFiles().get(0).name());
+        assertEquals("file2.txt", response.undeletedFiles().get(0).name());
+
+        verify(fileRepository).findAllById(ids);
+        verify(fileRepository).deleteAll(List.of(file1));
+
+        // Ensure file1 is deleted
+        assertTrue(Files.notExists(getPath(file1)));
+    }
+
+    private com.personal.spring_questly.model.File createTestFile(UUID id, String name) {
+        com.personal.spring_questly.model.File file = new com.personal.spring_questly.model.File();
+        file.setId(id);
+        file.setModuleName(MODULE_NAME);
+        file.setName(name);
+        return file;
+    }
+
+    private void createFileOnDisk(com.personal.spring_questly.model.File file) throws IOException {
+        Path dirPath = Paths.get(UPLOAD_DIR, file.getModuleName());
+        Files.createDirectories(dirPath);
+
+        Path filePath = dirPath.resolve(file.getName());
+        if (!Files.exists(filePath)) {
+            Files.createFile(filePath);
+        }
+
+        System.out.println("Created file at: " + filePath.toAbsolutePath());
+    }
+
+    private Path getPath(com.personal.spring_questly.model.File file) {
+        return Paths.get(UPLOAD_DIR, file.getModuleName(), file.getName());
+    }
 
 }
