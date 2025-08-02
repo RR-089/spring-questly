@@ -1,5 +1,7 @@
 package com.personal.spring_questly.service.impl;
 
+import com.personal.spring_questly.dto.file.BulkDeleteFilesResponseDTO;
+import com.personal.spring_questly.dto.file.FileDTO;
 import com.personal.spring_questly.exception.CustomException.BadRequestException;
 import com.personal.spring_questly.exception.CustomException.NotFoundException;
 import com.personal.spring_questly.repository.FileRepository;
@@ -13,6 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +29,19 @@ public class FileServiceImpl implements FileService {
 
     @Value("${file.upload-dir}")
     private String uploadDir;
+
+    public static FileDTO mapToDTO(com.personal.spring_questly.model.File file) {
+        return FileDTO.builder()
+                      .id(file.getId())
+                      .moduleName(file.getModuleName())
+                      .name(file.getName())
+                      .type(file.getType())
+                      .size(file.getSize())
+                      .index(file.getIndex())
+                      .uri(file.getUri())
+                      .uploadedAt(file.getCreatedAt())
+                      .build();
+    }
 
     @Override
     public String getFileMimeType(File file) {
@@ -118,6 +135,47 @@ public class FileServiceImpl implements FileService {
         }
 
         return fileRepository.saveAll(newFiles);
+    }
+
+    @Override
+    public BulkDeleteFilesResponseDTO bulkDeleteFiles(List<UUID> ids) {
+        List<com.personal.spring_questly.model.File> filesToDelete =
+                fileRepository.findAllById(ids);
+
+        List<com.personal.spring_questly.model.File> deletedFiles = new ArrayList<>();
+        List<com.personal.spring_questly.model.File> undeletedFiles = new ArrayList<>();
+
+        for (com.personal.spring_questly.model.File file : filesToDelete) {
+            Path filePath = Paths.get(uploadDir, file.getModuleName(), file.getName());
+            File fileToDelete = filePath.toFile();
+
+            if (fileToDelete.exists()) {
+                boolean isDeleted = fileToDelete.delete();
+                if (isDeleted) {
+                    deletedFiles.add(file);
+                } else {
+                    undeletedFiles.add(file);
+                }
+            } else {
+                undeletedFiles.add(file);
+            }
+        }
+
+        // Delete successfully deleted files from DB
+        if (!deletedFiles.isEmpty()) {
+            fileRepository.deleteAll(deletedFiles);
+        }
+
+        return BulkDeleteFilesResponseDTO.builder()
+                                         .deletedFiles(convertToFileDTOs(deletedFiles))
+                                         .undeletedFiles(convertToFileDTOs(undeletedFiles))
+                                         .build();
+    }
+
+    private List<FileDTO> convertToFileDTOs(List<com.personal.spring_questly.model.File> files) {
+        return files.stream()
+                    .map(FileServiceImpl::mapToDTO)
+                    .toList();
     }
 
     private String getFilePath(String moduleName, String randomFileName) throws IOException {

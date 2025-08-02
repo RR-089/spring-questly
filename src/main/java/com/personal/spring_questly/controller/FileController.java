@@ -1,6 +1,8 @@
 package com.personal.spring_questly.controller;
 
 import com.personal.spring_questly.dto.common.ApiResponseDTO;
+import com.personal.spring_questly.dto.file.BulkDeleteFilesRequestDTO;
+import com.personal.spring_questly.dto.file.BulkDeleteFilesResponseDTO;
 import com.personal.spring_questly.dto.file.BulkUploadFilesRequestDTO;
 import com.personal.spring_questly.repository.UserRepository;
 import com.personal.spring_questly.service.FileService;
@@ -44,9 +46,9 @@ public class FileController {
                 fileService.bulkUploadFiles(dto.moduleName(), dto.files());
 
         Object responseData = data.size() > 1 ?
-                List.of(data.stream()
-                            .map(com.personal.spring_questly.model.File::getUri)
-                            .toList())
+                data.stream()
+                    .map(com.personal.spring_questly.model.File::getUri)
+                    .toList()
                 : data.get(0).getUri();
 
         return ResponseEntity.status(status).body(
@@ -56,6 +58,22 @@ public class FileController {
                               .data(responseData)
                               .build()
         );
+    }
+
+    @DeleteMapping(value = "bulk-delete")
+    public ResponseEntity<ApiResponseDTO<BulkDeleteFilesResponseDTO>> bulkDeleteFiles(
+            @Valid @RequestBody BulkDeleteFilesRequestDTO dto
+    ) {
+        BulkDeleteFilesResponseDTO data = fileService.bulkDeleteFiles(dto.fileIds());
+
+        ApiResponseDTO<BulkDeleteFilesResponseDTO> response = ApiResponseDTO.<BulkDeleteFilesResponseDTO>builder()
+                                                                            .status(HttpStatus.OK.value())
+                                                                            .message("Bulk delete successful")
+                                                                            .data(data)
+                                                                            .build();
+
+        return ResponseEntity.ok(response);
+
     }
 
 }

@@ -1,5 +1,6 @@
 package com.personal.spring_questly.service;
 
+import com.personal.spring_questly.dto.file.FileDTO;
 import com.personal.spring_questly.exception.CustomException.BadRequestException;
 import com.personal.spring_questly.exception.CustomException.NotFoundException;
 import com.personal.spring_questly.repository.FileRepository;
@@ -18,6 +19,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 import static com.personal.spring_questly.utils.FieldUtils.injectField;
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,15 +27,35 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class FileServiceTests {
+
     @Mock
     private FileRepository fileRepository;
-
     @InjectMocks
     private FileServiceImpl fileService;
 
     @BeforeEach
     void setup() {
         injectField(fileService, "uploadDir", "./uploads/");
+    }
+
+    @Test
+    void testMapToDto_Success() {
+        com.personal.spring_questly.model.File file =
+                com.personal.spring_questly.model.File.builder()
+                                                      .id(UUID.randomUUID())
+                                                      .moduleName("user")
+                                                      .name("random-name")
+                                                      .uri("/user/random-name")
+                                                      .type("image/jpg")
+                                                      .size(1000D)
+                                                      .index(null)
+                                                      .build();
+
+        FileDTO result = FileServiceImpl.mapToDTO(file);
+
+        assertEquals(result.name(), file.getName());
+        assertEquals(result.moduleName(), file.getModuleName());
+        assertEquals(result.uri(), file.getUri());
     }
 
     @Test
