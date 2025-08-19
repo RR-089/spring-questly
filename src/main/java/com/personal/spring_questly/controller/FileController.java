@@ -4,7 +4,6 @@ import com.personal.spring_questly.dto.common.ApiResponseDTO;
 import com.personal.spring_questly.dto.file.BulkDeleteFilesRequestDTO;
 import com.personal.spring_questly.dto.file.BulkDeleteFilesResponseDTO;
 import com.personal.spring_questly.dto.file.BulkUploadFilesRequestDTO;
-import com.personal.spring_questly.repository.UserRepository;
 import com.personal.spring_questly.service.FileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,6 @@ import java.util.List;
 @Slf4j
 public class FileController {
     private final FileService fileService;
-    private final UserRepository userRepository;
 
     @GetMapping(value = "{moduleName}/{fileName:.+}")
     public ResponseEntity<?> getFile(
